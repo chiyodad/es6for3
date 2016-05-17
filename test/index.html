@@ -175,6 +175,26 @@ bsTest('Set',
 		return set.values().reduce(function(p,c){return p + c});
 	}, 6
 );
+bsTest('WeakSet',
+	function(){
+		var arr = [new Date(), {}, () => {}, [1]];
+		var wset = new WeakSet(arr);
+		return wset.has(arr[1]) && wset.has(arr[3]);
+	}, true,
+	function(){
+		var arr = [{a:1}, {a:2}, {a:3}, {a:4}];
+		var newObj = {a:5};
+		var wset = new WeakSet(arr);
+		wset.add(newObj);
+		return wset.has(newObj);
+	}, true,
+	function(){
+		var arr = [{a:1}, {a:2}, {a:3}, {a:4}];
+		var wset = new WeakSet(arr);
+		wset['delete'](arr[3]);
+		return wset.has(arr[3]);
+	}, false
+);
 bsTest('Generator',
 	function(){
 		var gene = Generator(function(a){
