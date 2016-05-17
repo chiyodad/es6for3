@@ -1,5 +1,5 @@
 if(!window.WeakSet || bsTest) (function(){
-	var SET = Symbol(), ID = Symbol(),
+	var SET = Symbol(), 
 		type = {'object':1, 'function':1},
 		check = function(k){return k && type[typeof k];},
 		WSet = function(a){
