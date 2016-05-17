@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<title>es643</title>
+<meta charset="utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="format-detection" content="telephone=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1"/>
+</head>
+<body>
+<div id="stage">
+
+</div>
+
+<div id="result"></div>
+<div id="test"></div>
+<script src="bsTest.js"></script>
+<script src="../src/000_Symbol.js"></script>
+<script src="../src/010_Iter.js"></script>
+<script src="../020_Dest.js"></script>
+<script src="../src/030_ForOf.js"></script>
+<script src="../src/040_Spread.js"></script>
+<script src="../src/060_Map.js"></script>
+<script src="../src/070_WeakMap.js"></script>
+<script src="../src/080_Set.js"></script>
+<script src="../src/100_Generator.js"></script>
+<script>
+bsTest('Symbol',
+	function(){
+		var s0 = Symbol(), s1 = Symbol();
+		var a = {};
+		a[s0] = 3, a[s1] = 5;
+		return a[s0] + a[s1];
+	}, 8
+);
+bsTest('Symbol.for',
+	function(){
+		var s0 = Symbol['for']('test');
+		return Symbol.keyFor(s0);
+	}, 'test'
+);
+bsTest('Iter',
+	function(){
+		var s0 = new Iter([1,2,3]);
+		return s0.next().value + s0.next().value + s0.next().value;
+	}, 6
+);
+bsTest('Array',
+	function(){
+		var s0 = 0;
+		[1,2,3].forEach(function(v){s0 += v;});
+		return s0;
+	}, 6,
+	function(){
+		var s0 = 0;
+		[1,2,3].map(function(v){return v *= 2;}).forEach(function(v){s0 += v;});
+		return s0;
+	}, 12,
+	function(){
+		var s0 = 0;
+		[1,2,3].filter(function(v){return v>1;}).forEach(function(v){s0 += v;});
+		return s0;
+	}, 5,
+	function(){
+		return [1,2,3].reduce(function(p,c){return p + c;});
+	}, 6,
+	function(){
+		return [1,2,3].reduce(function(p,c){return p + c;}, 5);
+	}, 11,
+	function(){
+		return Array.from("123").map(function(v){return parseFloat(v);}).reduce(function(p,c){return p + c;});
+	}, 6
+);
+bsTest('destructuring',
+	function(){
+		var d = Dest('{a, b = 2, c} = {"a":1, "c":3}');
+		return d.a + d.b + d.c;
+	}, 6,
+	function(){
+		var d = Dest('{data:[,{a,b},c], d}', {data:[0,{a:1, b:2}, 3], d:4});
+		return d.a + d.b + d.c + d.d;
+	}, 10
+);
+bsTest('ForOf',
+	function(){
+		var a = 0, b = 0;
+		For('{a,b}').Of([{a:1, b:2}, {a:3, b:4}], function(v){
+			a += v.a, b += v.b;
+		})
+		return a == 4 && b == 6;
+	}, true,
+	function(){
+		var a = 0;
+		For.Of("1234", function(v){
+			a += parseFloat(v);
+		});
+		return a;
+	}, 10
+);
+bsTest('Spread',
+	function(){
+		return Spread([1,2,'...',[3,4]]).reduce(function(p,c){return p + c});
+	}, 10,
+	function(){
+		return Spread([1,2,'...',[3,4, '...', [5,6]]]).reduce(function(p,c){return p + c});
+	}, 21
+);
+bsTest('Map',
+	function(){
+		var r = {};
+		(new Map([['a',1], ['b',2]])).forEach(function(v, k){
+			r[k] = v;
+		});
+		return r.a == 1 && r.b == 2;
+	}, true,
+	function(){
+		var map = new Map([['a',1], ['b',2]]);
+		return map.get('a');
+	}, 1,
+	function(){
+		var map = new Map([['a',1], ['b',2]]);
+		map.set('c', 3);
+		return map.get('c');
+	}, 3,
+	function(){
+		var map = new Map([['a',1], ['b',2]]);
+		map['delete']('a');
+		return map.get('a');
+	}, undefined,
+	function(){
+		var map = new Map([['a',1], ['b',2]]), r = {};
+		For('[k,v]').Of(map, function(d){
+			r[d.k] = d.v;
+		});
+		return r.a == 1 && r.b == 2
+	}, true,
+	function(){
+		var map = new Map([['a',1], ['b',2]]);
+		map.clear();
+		return map.get('a') === undefined && map.get('b') === undefined;
+	}, true
+);
+bsTest('WeakMap',
+	function(){
+		var map = new WeakMap(), a = {}, b = {};
+		map.set(a, 3);
+		map.set(b, 5);
+		return map.get(a) == 3 && map.get(b) == 5;
+	}, true,
+	function(){
+		var map = new WeakMap(), a = {}, b = {};
+		map.set(a, 3);
+		map.set(b, 5);
+		map['delete'](a);
+		return map.get(a);
+	}, undefined
+);
+bsTest('Set',
+	function(){
+		var set = new Set([1,2,3,4]);
+		return set.has(1) && set.has(3);
+	}, true,
+	function(){
+		var set = new Set([1,2,3,4]);
+		set.add(1);
+		return set.values().reduce(function(p,c){return p + c});
+	}, 10,
+	function(){
+		var set = new Set([1,2,3,4]);
+		set['delete'](4);
+		return set.values().reduce(function(p,c){return p + c});
+	}, 6
+);
+bsTest('Generator',
+	function(){
+		var gene = Generator(function(a){
+			var i = 1;
+			while(i <= a){
+				Yield(i);
+				i++;
+			}
+		}), a = 0;
+		For.Of(gene(4), function(v){
+			a += v;
+		});
+		return a;
+	}, 10
+);
+</script>
+</body>
+</html>
