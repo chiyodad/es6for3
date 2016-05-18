@@ -19,7 +19,7 @@ if(!window.Symbol || bsTest)(function(){
 		syms = {};
 	Sym.prototype.toString = function(){return this[ID];},
 	Symbol['for'] = function(k) {
-		if(!keys[k]) syms[keys[k] = Symbol(k)] = k;
+		if(!keys[k]) syms[keys[k] = Symbol()] = k;
 		return keys[k];
 	};
 	Symbol.keyFor = function(s){return syms[s];};
